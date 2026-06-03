@@ -2,6 +2,7 @@ import os
 import logging
 import requests
 import threading
+import asyncio
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -77,6 +78,13 @@ def main() -> None:
     if not TOKEN:
         logger.error("No TELEGRAM_TOKEN found in environment variables!")
         return
+
+    # FIX FOR PYTHON 3.14+: Explicitly set up the asyncio event loop
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
     # Start the dummy web server in a separate thread so Render is happy
     web_thread = threading.Thread(target=run_web_server, daemon=True)
